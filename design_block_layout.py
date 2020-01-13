@@ -64,6 +64,11 @@ if __name__ == '__main__':
                     layelement.attrib["y"]=str(y)
                     if "rot" in blkelement.attrib:
                         layelement.attrib["rot"]= blkelement.attrib["rot"]
+                    for attribute in layelement:
+                        x = float(attribute.attrib["x"]) + coordinates[0]
+                        y = float(attribute.attrib["y"]) + coordinates[1]
+                        attribute.attrib["x"]=str(x)
+                        attribute.attrib["y"]=str(y)
 
     #eagle > designblock > drawings > drawing > schematic > sheets > sheet > nets
     dsntosch_nets = {}
