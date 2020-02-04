@@ -7,23 +7,26 @@ if __name__ == '__main__':
     parser.add_argument('file', action="store", help='Eagle Schematic/Layout file (.sch/.brd)')
     parser.add_argument('sheet', action="store", help='Eagle Schematic sheet name')
     parser.add_argument('block', action="store", help='Eagle Design Block file (.dbl)')
-    parser.add_argument('--coordinates', '-c', action="store", default="0,0", help='origin coordinates on PCB')
+    parser.add_argument('--coordinates', '-c', action="store", default="0,0", help='origin coordinates on PCB: "x,y"')
     args = parser.parse_args()
     coordinates = (float(args.coordinates.split(',')[0]), float(args.coordinates.split(',')[1]))
 
     #find corresponding sheet
     schematictree = ET.parse(args.file + ".sch")
     schematicroot = schematictree.getroot()
-    for moduleinst in schematicroot.iter('moduleinst'):
-        if moduleinst.attrib["name"]==args.sheet:
+    instanceroot = schematicroot
+    for hierarchmoduleinst in args.sheet.split(':'):
+        for moduleinst in instanceroot.iter('moduleinst'):
+            if moduleinst.attrib["name"]==hierarchmoduleinst:
+                break
+        for module in schematicroot.iter('module'):
+            if module.attrib["name"]==moduleinst.attrib["module"]:
+                schematicmodule = module
+                instanceroot = module
+                break
+        else:
+            print("module not found in schematic file")
             break
-    for module in schematicroot.iter('module'):
-        if module.attrib["name"]==moduleinst.attrib["module"]:
-            schematicmodule = module
-            break
-    else:
-        print("module not found in schematic file")
-        #break
 
     layouttree = ET.parse(args.file + ".brd")
     layoutroot = layouttree.getroot()
@@ -55,10 +58,11 @@ if __name__ == '__main__':
     for blkelement in blockboard.iter("element"):
         x = float(blkelement.attrib["x"]) + coordinates[0]
         y = float(blkelement.attrib["y"]) + coordinates[1]
+        #print blkelement.attrib["name"]
         print("Move " + dsntosch_refs[blkelement.attrib["name"]] + " to " + str(x) + "," + str(y))
         for layelement in layoutboard.iter("element"):
-            if layelement.attrib["name"].split(':')[0] == args.sheet:
-                if layelement.attrib["name"].split(':')[1] == dsntosch_refs[blkelement.attrib["name"]]:
+            if layelement.attrib["name"].split(':')[:-1] == args.sheet.split(':'):
+                if layelement.attrib["name"].split(':')[-1] == dsntosch_refs[blkelement.attrib["name"]]:
                     print("Moving " + layelement.attrib["name"])
                     layelement.attrib["x"]=str(x)
                     layelement.attrib["y"]=str(y)
@@ -77,8 +81,8 @@ if __name__ == '__main__':
     #eagle > designblock > drawings > drawing > board > signals
     for blksignal in blockboard.iter("signal"):
         for laysignal in layoutboard.iter("signal"):
-            if laysignal.attrib["name"].split(':')[0] == args.sheet:
-                if laysignal.attrib["name"].split(':')[1] == blksignal.attrib["name"]:#dsntosch_nets[blksignal.attrib["name"]]:
+            if laysignal.attrib["name"].split(':')[:-1] == args.sheet.split(':'):
+                if laysignal.attrib["name"].split(':')[-1] == blksignal.attrib["name"]:#dsntosch_nets[blksignal.attrib["name"]]:
                     for wire in blksignal.findall("wire"):
                         wire.attrib["x1"]=str(float(wire.attrib["x1"])+coordinates[0])
                         wire.attrib["x2"]=str(float(wire.attrib["x2"])+coordinates[0])
