@@ -81,24 +81,37 @@ if __name__ == '__main__':
     #eagle > designblock > drawings > drawing > board > signals
     for blksignal in blockboard.iter("signal"):
         for laysignal in layoutboard.iter("signal"):
-            if laysignal.attrib["name"].split(':')[:-1] == args.sheet.split(':'):
-                if laysignal.attrib["name"].split(':')[-1] == blksignal.attrib["name"]:#dsntosch_nets[blksignal.attrib["name"]]:
-                    for wire in blksignal.findall("wire"):
-                        wire.attrib["x1"]=str(float(wire.attrib["x1"])+coordinates[0])
-                        wire.attrib["x2"]=str(float(wire.attrib["x2"])+coordinates[0])
-                        wire.attrib["y1"]=str(float(wire.attrib["y1"])+coordinates[1])
-                        wire.attrib["y2"]=str(float(wire.attrib["y2"])+coordinates[1])
-                        laysignal.append(wire)
-                    for via in blksignal.findall("via"):
-                        via.attrib["x"]=str(float(via.attrib["x"])+coordinates[0])
-                        via.attrib["y"]=str(float(via.attrib["y"])+coordinates[1])
-                        laysignal.append(via)
-                    for polygon in blksignal.findall("polygon"):
-                        for vertex in polygon.findall("vertex"):
-                            vertex.attrib["x"]=str(float(vertex.attrib["x"])+coordinates[0])
-                            vertex.attrib["y"]=str(float(vertex.attrib["y"])+coordinates[1])
-                        laysignal.append(polygon)
+            #Match nets based on the connected elements
+            for blkcontactref in blksignal.iter("contactref"):
+                for laycontactref in laysignal.iter("contactref"):
+                    if laycontactref.attrib["element"].split(':')[:-1] == args.sheet.split(':'):
+                        if laycontactref.attrib["element"].split(':')[-1] == blkcontactref.attrib["element"]:
+                            if laycontactref.attrib["pad"] == blkcontactref.attrib["pad"]:
+                                #print laycontactref.attrib["element"].split(':')[:-1], args.sheet.split(':')
+                                #print laycontactref.attrib["element"].split(':')[-1],blkcontactref.attrib["element"]
+                                print "Matched Net " + blksignal.attrib["name"] + " to Net " + laysignal.attrib["name"]
+                                for wire in blksignal.findall("wire"):
+                                    wire.attrib["x1"]=str(float(wire.attrib["x1"])+coordinates[0])
+                                    wire.attrib["x2"]=str(float(wire.attrib["x2"])+coordinates[0])
+                                    wire.attrib["y1"]=str(float(wire.attrib["y1"])+coordinates[1])
+                                    wire.attrib["y2"]=str(float(wire.attrib["y2"])+coordinates[1])
+                                    laysignal.append(wire)
+                                for via in blksignal.findall("via"):
+                                    via.attrib["x"]=str(float(via.attrib["x"])+coordinates[0])
+                                    via.attrib["y"]=str(float(via.attrib["y"])+coordinates[1])
+                                    laysignal.append(via)
+                                for polygon in blksignal.findall("polygon"):
+                                    for vertex in polygon.findall("vertex"):
+                                        vertex.attrib["x"]=str(float(vertex.attrib["x"])+coordinates[0])
+                                        vertex.attrib["y"]=str(float(vertex.attrib["y"])+coordinates[1])
+                                    laysignal.append(polygon)
+                                break
+                else:
+                    continue
                 break
+            else:
+                continue
+            break
         else:
             print("Net not found " + blksignal.attrib["name"])
 
