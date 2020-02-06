@@ -19,6 +19,9 @@ if __name__ == '__main__':
         for moduleinst in instanceroot.iter('moduleinst'):
             if moduleinst.attrib["name"]==hierarchmoduleinst:
                 break
+        else:
+            print("module not found in schematic file")
+            break
         for module in schematicroot.iter('module'):
             if module.attrib["name"]==moduleinst.attrib["module"]:
                 schematicmodule = module
@@ -68,11 +71,19 @@ if __name__ == '__main__':
                     layelement.attrib["y"]=str(y)
                     if "rot" in blkelement.attrib:
                         layelement.attrib["rot"]= blkelement.attrib["rot"]
-                    for attribute in layelement:
-                        x = float(attribute.attrib["x"]) + coordinates[0]
-                        y = float(attribute.attrib["y"]) + coordinates[1]
-                        attribute.attrib["x"]=str(x)
-                        attribute.attrib["y"]=str(y)
+                    for layattribute in layelement.iter("attribute"):
+                        for blkattribute in blkelement.iter("attribute"):
+                            if blkattribute.attrib["name"] == layattribute.attrib["name"]:
+                                x = float(blkattribute.attrib["x"]) + coordinates[0]
+                                y = float(blkattribute.attrib["y"]) + coordinates[1]
+                                layattribute.attrib["x"]=str(x)
+                                layattribute.attrib["y"]=str(y)
+                                if "rot" in blkattribute.attrib:
+                                    layattribute.attrib["rot"]= blkattribute.attrib["rot"]
+                                break
+                        else:
+                            layattribute.attrib["x"]=str(float(blkelement.attrib["x"]) + coordinates[0])
+                            layattribute.attrib["y"]=str(float(blkelement.attrib["y"]) + coordinates[1])
 
     #eagle > designblock > drawings > drawing > schematic > sheets > sheet > nets
     dsntosch_nets = {}
@@ -116,3 +127,6 @@ if __name__ == '__main__':
             print("Net not found " + blksignal.attrib["name"])
 
     layouttree.write(args.file + ".brd")
+print "Turn airwires off and on with:"
+print "\t ratsnest ! *"
+print "\t ratsnest *"
