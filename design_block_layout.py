@@ -2,25 +2,20 @@
 import argparse
 import xml.etree.ElementTree as ET
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Add design block layout')
-    parser.add_argument('file', action="store", help='Eagle Schematic/Layout file (.sch/.brd)')
-    parser.add_argument('sheet', action="store", help='Eagle Schematic sheet name')
-    parser.add_argument('block', action="store", help='Eagle Design Block file (.dbl)')
-    parser.add_argument('--coordinates', '-c', action="store", default="0,0", help='origin coordinates on PCB: "x,y"')
-    args = parser.parse_args()
-    coordinates = (float(args.coordinates.split(',')[0]), float(args.coordinates.split(',')[1]))
-
+def placeBlock(file, sheet, block, coordinates):
+    
     #find corresponding sheet
-    schematictree = ET.parse(args.file + ".sch")
+    schematictree = ET.parse(file + ".sch")
     schematicroot = schematictree.getroot()
     instanceroot = schematicroot
-    for hierarchmoduleinst in args.sheet.split(':'):
+    #find matches in schematic as in RECEIVER1:S1:AD8334 => find RECEIVER1 instance
+    print("sheet split",sheet,sheet.split(":"))
+    for hierarchmoduleinst in sheet.split(':'):
         for moduleinst in instanceroot.iter('moduleinst'):
             if moduleinst.attrib["name"]==hierarchmoduleinst:
                 break
         else:
-            print("module not found in schematic file")
+            print("moduleinst not found in schematic file")
             break
         for module in schematicroot.iter('module'):
             if module.attrib["name"]==moduleinst.attrib["module"]:
@@ -31,12 +26,12 @@ if __name__ == '__main__':
             print("module not found in schematic file")
             break
 
-    layouttree = ET.parse(args.file + ".brd")
+    layouttree = ET.parse(file + ".brd")
     layoutroot = layouttree.getroot()
     for board in layoutroot.iter('board'):
         layoutboard = board
-
-    blocktree = ET.parse(args.block + ".dbl")
+    print(block)
+    blocktree = ET.parse(block + ".dbl")
     blockroot = blocktree.getroot()
     for schematic in blockroot.iter('schematic'):
         blockschematic = schematic
@@ -64,7 +59,7 @@ if __name__ == '__main__':
         #print blkelement.attrib["name"]
         print("Move " + dsntosch_refs[blkelement.attrib["name"]] + " to " + str(x) + "," + str(y))
         for layelement in layoutboard.iter("element"):
-            if layelement.attrib["name"].split(':')[:-1] == args.sheet.split(':'):
+            if layelement.attrib["name"].split(':')[:-1] == sheet.split(':'):
                 if layelement.attrib["name"].split(':')[-1] == dsntosch_refs[blkelement.attrib["name"]]:
                     print("Moving " + layelement.attrib["name"])
                     layelement.attrib["x"]=str(x)
@@ -95,12 +90,12 @@ if __name__ == '__main__':
             #Match nets based on the connected elements
             for blkcontactref in blksignal.iter("contactref"):
                 for laycontactref in laysignal.iter("contactref"):
-                    if laycontactref.attrib["element"].split(':')[:-1] == args.sheet.split(':'):
+                    if laycontactref.attrib["element"].split(':')[:-1] == sheet.split(':'):
                         if laycontactref.attrib["element"].split(':')[-1] == blkcontactref.attrib["element"]:
                             if laycontactref.attrib["pad"] == blkcontactref.attrib["pad"]:
                                 #print laycontactref.attrib["element"].split(':')[:-1], args.sheet.split(':')
                                 #print laycontactref.attrib["element"].split(':')[-1],blkcontactref.attrib["element"]
-                                print "Matched Net " + blksignal.attrib["name"] + " to Net " + laysignal.attrib["name"]
+                                print("Matched Net " + blksignal.attrib["name"] + " to Net " + laysignal.attrib["name"])
                                 for wire in blksignal.findall("wire"):
                                     wire.attrib["x1"]=str(float(wire.attrib["x1"])+coordinates[0])
                                     wire.attrib["x2"]=str(float(wire.attrib["x2"])+coordinates[0])
@@ -126,7 +121,17 @@ if __name__ == '__main__':
         else:
             print("Net not found " + blksignal.attrib["name"])
 
-    layouttree.write(args.file + ".brd")
-print "Turn airwires off and on with:"
-print "\t ratsnest ! *"
-print "\t ratsnest *"
+    layouttree.write(file + ".brd")
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Add design block layout')
+    parser.add_argument('file', action="store", help='Eagle Schematic/Layout file (.sch/.brd)')
+    parser.add_argument('sheet', action="store", help='Eagle Schematic sheet name')
+    parser.add_argument('block', action="store", help='Eagle Design Block file (.dbl)')
+    parser.add_argument('--coordinates', '-c', action="store", default="0,0", help='origin coordinates on PCB: "x,y"')
+    args = parser.parse_args()
+    coordinates = (float(args.coordinates.split(',')[0]), float(args.coordinates.split(',')[1]))
+    placeBlock(args.file, args.sheet, args.block, coordinates)
+print("Turn airwires off and on with:")
+print("\t ratsnest ! *")
+print("\t ratsnest *")
