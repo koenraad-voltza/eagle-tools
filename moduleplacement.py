@@ -5,7 +5,7 @@ import design_block_layout
 
 designblocklist = [['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], [
     'LEVEL_SHIFTER', 'level_shifter_adj_15V'], ['DRIVER', 'sthv1600']]
-command = "python3 ./design_block_layout.py "#~/repositories/imec-github/SilenSE/hardware/silense_v2"
+# command = "python3 ./design_block_layout.py "#~/repositories/imec-github/SilenSE/hardware/silense_v2"
 design_block_dir = "/Users/wdevries/GIT/eagle/design blocks/design blocks/"#"~/repositories/imec-github/eagle/design\ blocks/design\ blocks/"
 
 
@@ -64,14 +64,14 @@ def listModuleInst(file, root,x,y):
                     print(modInst, design_block_name)
                     if(type(design_block_name) != list):
                         placeblock(file,
-                            modInst, command, design_block_dir+str(design_block_name), x, y)
+                            modInst, design_block_dir+str(design_block_name), x, y)
                         x += x_offset
                         y += y_offset
 
 # call the placement function for the specific designblock and components, place them at (x,y)
 
 
-def placeblock(file, module, command, design_block, x, y):
+def placeblock(file, module, design_block, x, y):
     # os.system(command + " " + module + " " + design_block +
     #           " --coordinates " + str(x) + "," + str(y))
     design_block_layout.placeBlock(file, module, design_block, (x,y))
@@ -79,7 +79,6 @@ def placeblock(file, module, command, design_block, x, y):
 
 
 if __name__ == "__main__":
-    # todo parser for schematic relative link
     parser = argparse.ArgumentParser()
     parser.add_argument("directory",help="directory where schematic is")
     parser.add_argument(
