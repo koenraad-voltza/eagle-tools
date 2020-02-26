@@ -4,11 +4,9 @@ import argparse
 import design_block_layout
 
 designblocklist = [['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], [
-    'LEVEL_SHIFTER', 'level_shifter_adj_15V'], ['DRIVER', 'sthv1600']]
+    'LEVEL_SHIFTER', 'level_shifter_adj_15V'], ['DRIVER', 'sthv1600'],['STHV1600','sthv1600']]
 # command = "python3 ./design_block_layout.py "#~/repositories/imec-github/SilenSE/hardware/silense_v2"
 design_block_dir = "/Users/wdevries/GIT/eagle/design blocks/design blocks/"#"~/repositories/imec-github/eagle/design\ blocks/design\ blocks/"
-
-
 
 modList = []
 
@@ -31,7 +29,6 @@ def findModule(moduleName):
     # retrieve design block module names
     for module in root.iter('module'):
         if(module.attrib.get('name') == moduleName):
-            print("found", module)
             design_block_module = design_block_placement(moduleName)
             if(design_block_module != 0):
                 design_block_name = design_block_placement(moduleName)
@@ -85,7 +82,7 @@ if __name__ == "__main__":
         "schematic", help="link the schematic with design blocks")
     args = parser.parse_args()
     sch = args.directory + "/" + args.schematic
-    command = command + sch
+    # command = command + sch
     tree = ET.parse(sch+".sch")
     root = tree.getroot()
     listModuleInst(sch, root,x,y)
