@@ -3,16 +3,16 @@ import os
 import argparse
 import design_block_layout
 
-designblocklist = [['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], [
-    'LEVEL_SHIFTER', 'level_shifter_adj_15V'], ['DRIVER', 'sthv1600'],['STHV1600','sthv1600']]
+designblocklist = [['FILTER','filter_mezzanine_carpatchiot']]#[['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], [
+    #'LEVEL_SHIFTER', 'level_shifter_adj_15V'], ['DRIVER', 'sthv1600'],['STHV1600','sthv1600']]
 # command = "python3 ./design_block_layout.py "#~/repositories/imec-github/SilenSE/hardware/silense_v2"
 design_block_dir = "/Users/wdevries/GIT/eagle/design blocks/design blocks/"#"~/repositories/imec-github/eagle/design\ blocks/design\ blocks/"
 
 modList = []
 
 # todo get offsets from design block max layout size
-x = 40
-y = 40
+x = 200
+y = 200
 x_offset = 50
 y_offset = 50
 dList = list(zip(*designblocklist))
@@ -28,6 +28,7 @@ def design_block_placement(moduleName):
 def findModule(moduleName):
     # retrieve design block module names
     for module in root.iter('module'):
+        print(module)
         if(module.attrib.get('name') == moduleName):
             design_block_module = design_block_placement(moduleName)
             if(design_block_module != 0):
@@ -57,13 +58,15 @@ def listModuleInst(file, root,x,y):
                 print("-->", modInst, modClass)
                 design_block_name = findModule(modClass)
                 if(design_block_name != []):
-                    # print(modInst+":"+str(design_block_name[0][0]))
+                    print(modInst+":"+str(design_block_name[0][0]))
                     print(modInst, design_block_name)
                     if(type(design_block_name) != list):
                         placeblock(file,
                             modInst, design_block_dir+str(design_block_name), x, y)
                         x += x_offset
                         y += y_offset
+        else:
+            print("give a description at your main sheet in order to be retrievable")
 
 # call the placement function for the specific designblock and components, place them at (x,y)
 
