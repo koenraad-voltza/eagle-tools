@@ -3,7 +3,7 @@ import os
 import argparse
 import design_block_layout
 
-designblocklist = [['FILTER','filter_mezzanine_carpatchiot']]#[['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], [
+designblocklist = [['FILTER','filter_mezzanine_carpatchiot'],['SUB_EQ','MEMS-eq']]#[['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], [
     #'LEVEL_SHIFTER', 'level_shifter_adj_15V'], ['DRIVER', 'sthv1600'],['STHV1600','sthv1600']]
 # command = "python3 ./design_block_layout.py "#~/repositories/imec-github/SilenSE/hardware/silense_v2"
 design_block_dir = "/Users/wdevries/GIT/eagle/design blocks/design blocks/"#"~/repositories/imec-github/eagle/design\ blocks/design\ blocks/"
@@ -11,10 +11,12 @@ design_block_dir = "/Users/wdevries/GIT/eagle/design blocks/design blocks/"#"~/r
 modList = []
 
 # todo get offsets from design block max layout size
-x = 200
-y = 200
-x_offset = 50
-y_offset = 50
+x = 0
+y = 0
+x_offset = 10
+y_offset = 10
+x_max = 150
+y_max = 150
 dList = list(zip(*designblocklist))
 
 
@@ -62,9 +64,12 @@ def listModuleInst(file, root,x,y):
                     print(modInst, design_block_name)
                     if(type(design_block_name) != list):
                         placeblock(file,
-                            modInst, design_block_dir+str(design_block_name), x, y)
-                        x += x_offset
-                        y += y_offset
+                            modInst, design_block_dir+str(design_block_name), x, y)                      
+                        if(y < y_max):
+                            y += y_offset
+                        else:
+                            y = 0
+                            x += x_offset
         else:
             print("give a description at your main sheet in order to be retrievable")
 
