@@ -65,11 +65,11 @@ def listModuleInst(file, root,x,y):
                     if(type(design_block_name) != list):
                         placeblock(file,
                             modInst, design_block_dir+str(design_block_name), x, y)                      
-                        if(y < y_max):
-                            y += y_offset
-                        else:
-                            y = 0
+                        if(x < x_max):
                             x += x_offset
+                        else:
+                            x = 0
+                            y += y_offset
         else:
             print("give a description at your main sheet in order to be retrievable")
 
