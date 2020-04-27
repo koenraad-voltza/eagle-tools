@@ -3,10 +3,10 @@ import os
 import argparse
 import design_block_layout
 
-designblocklist = [['FILTER','filter_mezzanine_carpatchiot'],['SUB_EQ','MEMS-eq']]#[['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], [
+designblocklist = [['FILTER','filter_mezzanine_carpatchiot'],['SUB_EQ','MEMS-eq'],['5V_GEN','powerblock_P_5V_4A'],['ENVELOPE', 'envelope_detection']]#[['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], [
     #'LEVEL_SHIFTER', 'level_shifter_adj_15V'], ['DRIVER', 'sthv1600'],['STHV1600','sthv1600']]
 # command = "python3 ./design_block_layout.py "#~/repositories/imec-github/SilenSE/hardware/silense_v2"
-design_block_dir = "/Users/wdevries/GIT/eagle/design blocks/design blocks/"#"~/repositories/imec-github/eagle/design\ blocks/design\ blocks/"
+design_block_dir = "/Users/wdevries/GIT/eagle/design blocks/"#"~/repositories/imec-github/eagle/design\ blocks/design\ blocks/"
 
 modList = []
 
@@ -20,27 +20,27 @@ y_max = 150
 dList = list(zip(*designblocklist))
 
 
-def design_block_placement(moduleName):
+def design_block_retrieval(moduleName):
     try:
         return (designblocklist[dList[0].index(str(moduleName))][1])
     except:
         return 0
 
 
-def findModule(moduleName):
+def findModule(root, moduleName):
     # retrieve design block module names
     for module in root.iter('module'):
         print(module)
         if(module.attrib.get('name') == moduleName):
-            design_block_module = design_block_placement(moduleName)
+            design_block_module = design_block_retrieval(moduleName)
             if(design_block_module != 0):
-                design_block_name = design_block_placement(moduleName)
+                design_block_name = design_block_retrieval(moduleName)
             else:
                 design_block_name = []
                 for moduleinst in module.iter('moduleinst'):
                     print("*--> ", moduleinst.attrib.get('name'),
                         moduleinst.attrib.get('module'))
-                    modInst = design_block_placement(
+                    modInst = design_block_retrieval(
                         moduleinst.attrib.get('module'))
                     if(modInst != 0):
                         design_block_name.append([moduleinst.attrib.get('name')+":" +
@@ -58,7 +58,7 @@ def listModuleInst(file, root,x,y):
                 modInst = moduleinst.attrib.get('name')
                 modClass = moduleinst.attrib.get('module')
                 print("-->", modInst, modClass)
-                design_block_name = findModule(modClass)
+                design_block_name = findModule(root, modClass)
                 if(design_block_name != []):
                     print(modInst+":"+str(design_block_name[0][0]))
                     print(modInst, design_block_name)
