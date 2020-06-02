@@ -30,7 +30,6 @@ def placeBlock(file, sheet, block, coordinates):
     layoutroot = layouttree.getroot()
     for board in layoutroot.iter('board'):
         layoutboard = board
-    print(block)
     blocktree = ET.parse(block + ".dbl")
     blockroot = blocktree.getroot()
     for schematic in blockroot.iter('schematic'):

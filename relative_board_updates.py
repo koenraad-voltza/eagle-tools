@@ -74,7 +74,7 @@ def remove_wires_and_vias_in_board(layouttree, name, board):
                 # we remove old wires and vias
                 for child in signal:
                     if(child.tag == "wire" or child.tag == "via"):
-                        print("remove:", child.tag)
+                        # print("remove:", child.tag)
                         signal.remove(child)
                     else:
                         continue
@@ -116,7 +116,7 @@ def place_new_wires_and_vias(dbl, layouttree, contact_element, coordinates, cent
                                 for polygon in blksignal.findall("polygon"):
                                     for vertex in polygon.findall("vertex"):
                                         update_via_vertex(
-                                            vertex, coordinates, center_rot)
+                                            vertex, coordinates, center_rot, center_origin)
                                     laysignal.append(polygon)
                                 break
                     # else:
@@ -143,27 +143,27 @@ def unique_board_block_center(dir, file, center_component, value, dbl):
     boardroot = boardtree.getroot()
 
     brd_db_naming_list = create_mod_list(boardroot, value)
-    # for element in boardroot.iter("element"):
-    #     # el_level_name = element.attrib["name"].split(
-    #     #     ":")[0] + ":" + element.attrib["name"].split(":")[1] + ":"
-    #     for i in brd_db_naming_list:
-    #         x_orig = float(brd_db_naming_list.get(i).get("x"))
-    #         y_orig = float(brd_db_naming_list.get(i).get("y"))
-    #         rot_el = str(brd_db_naming_list.get(i).get("rot"))
-    #         if(element.attrib["name"].find(i) >= 0):
-    #             new_x, new_y, local_rot = rel_x_y_in_dbl(center_component,
-    #                                                      element.attrib["name"].split(":")[2], dbl)
+    for element in boardroot.iter("element"):
+        # el_level_name = element.attrib["name"].split(
+        #     ":")[0] + ":" + element.attrib["name"].split(":")[1] + ":"
+        for i in brd_db_naming_list:
+            x_orig = float(brd_db_naming_list.get(i).get("x"))
+            y_orig = float(brd_db_naming_list.get(i).get("y"))
+            rot_el = str(brd_db_naming_list.get(i).get("rot"))
+            if(element.attrib["name"].find(i) >= 0):
+                new_x, new_y, local_rot = rel_x_y_in_dbl(center_component,
+                                                         element.attrib["name"].split(":")[2], dbl)
 
-    #             # we use the rotation of the center element to calculate the x, y movement. new_rot is then used for local element rotation
+                # we use the rotation of the center element to calculate the x, y movement. new_rot is then used for local element rotation
 
-    #             place_x, place_y, place_rot = calc_new_loc_element(
-    #                 x_orig, y_orig, new_x, new_y, rot_el, local_rot)
+                place_x, place_y, place_rot = calc_new_loc_element(
+                    x_orig, y_orig, new_x, new_y, rot_el, local_rot)
 
-    #             element.attrib["x"] = str(place_x)
-    #             element.attrib["y"] = str(place_y)
-    #             element.attrib["rot"] = str(place_rot)
+                element.attrib["x"] = str(place_x)
+                element.attrib["y"] = str(place_y)
+                element.attrib["rot"] = str(place_rot)
 
-    #         remove_wires_and_vias_in_board(boardtree, i, search_file)
+            remove_wires_and_vias_in_board(boardtree, i, search_file)
     for i in brd_db_naming_list:
         x_orig = float(brd_db_naming_list.get(i).get("x"))
         y_orig = float(brd_db_naming_list.get(i).get("y"))
@@ -182,8 +182,8 @@ def rel_x_y_in_dbl(center_component, component, dbl):
     comp_x, comp_y, rot = locate_in_design_block(component, dbl)
     center_x, center_y, rot_center = locate_in_design_block(
         center_component, dbl)
-    x = float(comp_x) - float(center_x)
-    y = float(comp_y) - float(center_y)
+    x = round(float(comp_x) - float(center_x),2)
+    y = round(float(comp_y) - float(center_y),2)
     return x, y, rot
 
 
@@ -218,34 +218,6 @@ def calc_new_loc_element(x_orig, y_orig, new_x, new_y, rot_el, local_rot):
                     print("different")
     return place_x, place_y, place_rot
 
-
-# def calc_new_loc_wire_via(x_orig, y_orig, x1, y1, x2, y2, rot_el):
-#     if(rot_el == 'R0'):
-#         place_x1 = x_orig+x1
-#         place_y1 = y_orig+y1
-#         place_x2 = x_orig+x2
-#         place_y2 = y_orig+y2
-#     else:
-#         if(rot_el == 'R90'):
-#             print("need to verify coordinates!")
-#             place_x1 = x_orig-y1
-#             place_y1 = y_orig+x1
-#             place_x2 = x_orig-y2
-#             place_y2 = y_orig+x2
-#         else:
-#             if(rot_el == 'R180'):
-#                 place_x1 = x_orig-x1
-#                 place_y1 = y_orig-y1
-#                 place_x2 = x_orig-x2
-#                 place_y2 = y_orig-y2
-#             else:
-#                 if(rot_el == 'R270'):
-#                     print("need to verify coordinates!")
-#                     place_x = x_orig+new_y
-#                     place_y = y_orig-new_x
-#                 else:
-#                     print("different")
-#     return place_x1, place_y1, place_x2, place_y2
 
 
 def update_wire(wire, coordinates, center_rot, center_origin):
@@ -287,8 +259,8 @@ def update_wire(wire, coordinates, center_rot, center_origin):
 
 def update_via_vertex(via, coordinates, center_rot, center_origin):
     if(center_rot == 'R0'):
-        via.attrib["x"] = str(float(via.attrib["x"])+coordinates.get("x"))
-        via.attrib["y"] = str(float(via.attrib["y"])+coordinates.get("y"))
+        via.attrib["x"] = str(round(float(via.attrib["x"])+coordinates.get("x"),2))
+        via.attrib["y"] = str(round(float(via.attrib["y"])+coordinates.get("y"),2))
     else:
         if(center_rot == 'R90'):
             print("need to verify coordinates!")
@@ -321,8 +293,8 @@ def create_mod_list(blockroot, value):
                   element.attrib["x"], element.attrib["y"])
             brd_center_x = element.attrib["x"]
             brd_center_y = element.attrib["y"]
-            x = float(brd_center_x) - float(db_center_x)
-            y = float(brd_center_y) - float(db_center_y)
+            x = round(float(brd_center_x) - float(db_center_x),2)
+            y = round(float(brd_center_y) - float(db_center_y),2)
             if "rot" in element.attrib:
                 rot_el = element.attrib.get("rot")
             else:
@@ -335,7 +307,14 @@ def create_mod_list(blockroot, value):
     print(brd_db_naming)
     return brd_db_naming
 
-
+'''
+In order to use this:
+This is only useful if most parts of the designblock remains the same.
+remove all vias close to design blocks
+open a second eagle application (both board and schematic layout open), copy the updated designblock over the old one (schematic). 
+Now some components should be added on your board layout.
+Run the script
+'''
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser()
     # parser.add_argument("directory",help="directory where schematic is")
@@ -346,11 +325,20 @@ if __name__ == "__main__":
     # # command = command + sch
     # tree = ET.parse(sch+".sch")
     # root = tree.getroot()
-    db_center_x, db_center_y, center_rot = locate_in_design_block(
-        "IC1", "ad8334_LNAVGAVGA")
+
     address = "/Users/wdevries/GIT/SilenSE/hardware/v3_0/"
     file = "silense_v3"
+    
+    # db_center_x, db_center_y, center_rot = locate_in_design_block(
+    #     "IC1", "ad8334_LNAVGAVGA")
+    
+    # tree = unique_board_block_center(
+    #     address, file, "IC1", "AD8334ACPZ", "ad8334_LNAVGAVGA")
+
+    db_center_x, db_center_y, center_rot = locate_in_design_block(
+        "IC1", "envelope_detection_2nd_order_LP")
+    
     tree = unique_board_block_center(
-        address, file, "IC1", "AD8334ACPZ", "ad8334_LNAVGAVGA")
+        address, file, "IC1", "LT6238HGN#PBF", "envelope_detection_2nd_order_LP")
 
     tree.write(address + file+".brd")

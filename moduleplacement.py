@@ -3,20 +3,20 @@ import os
 import argparse
 import design_block_layout
 
-designblocklist = [['FILTER','filter_mezzanine_carpatchiot'],['SUB_EQ','MEMS-eq'],['5V_GEN','powerblock_P_5V_4A'],['ENVELOPE', 'envelope_detection']]#[['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], [
-    #'LEVEL_SHIFTER', 'level_shifter_adj_15V'], ['DRIVER', 'sthv1600'],['STHV1600','sthv1600']]
+designblocklist = [['5V_GEN','powerblock_P_5V_4A'],['LEVEL_SHIFTER', 'level_shifter_adj_15V']]#[['AD8334', 'ad8334_LNAVGAVGA'], ['ENVELOPE', 'envelope_detection'], ['FILTER','filter_mezzanine_carpatchiot'],['SUB_EQ','MEMS-eq'],['5V_GEN','powerblock_P_5V_4A'],['ENVELOPE', 'envelope_detection']
+    # ['DRIVER', 'sthv1600'],['STHV1600','sthv1600']]
 # command = "python3 ./design_block_layout.py "#~/repositories/imec-github/SilenSE/hardware/silense_v2"
 design_block_dir = "/Users/wdevries/GIT/eagle/design blocks/"#"~/repositories/imec-github/eagle/design\ blocks/design\ blocks/"
 
 modList = []
 
 # todo get offsets from design block max layout size
-x = 0
-y = 0
-x_offset = 10
-y_offset = 10
-x_max = 150
-y_max = 150
+x = -100
+y = -100
+x_offset = 100
+y_offset = 100
+x_max = 1500
+y_max = 1500
 dList = list(zip(*designblocklist))
 
 
